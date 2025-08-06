@@ -27,6 +27,16 @@ void	addback_envnode(t_env **start, t_env *node)
 	}
 }
 
+int  print_env(t_env *start)
+{
+	while (start)
+	{
+		printf("%s=%s\n", start->name, start->value);
+		start = start->next;
+	}
+	return STATUS_OK;
+}
+
 
 
 char	*my_getenv(t_env *start, char *name)

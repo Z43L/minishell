@@ -46,6 +46,8 @@ int	exec_builtin(t_shell *mini_sh, t_cmd *cmd, t_builtin bi_cmd)
 		exit_code = bi_export(mini_sh, cmd);
 	else if (bi_cmd == BI_UNSET)
 		exit_code = bi_unset(mini_sh, cmd);
+	else if (bi_cmd == BI_ENV)
+		exit_code = print_env(mini_sh->env);
 	return (exit_code);
 }
 

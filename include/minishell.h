@@ -176,7 +176,7 @@ void	clear_cmd(t_cmd *cmd);
 void	addback_envnode(t_env **start, t_env *node);
 char	*my_getenv(t_env *start, char *name);
 int		is_valid_var_name(const char *argv);
-
+int	print_env(t_env *start);
 
 
 // EXECUTION_UTILS ===============================================================
