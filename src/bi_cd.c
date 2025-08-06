@@ -26,53 +26,19 @@ char	*new_env2(t_env **env_list, char *name)
 	return (NULL);
 }
 
-static char	*cd_set_path(t_shell *mini_sh, t_cmd *cmd)
+char *new_path(t_shell *mini_sh, char *name)
 {
-	char	*path;
+	char *path;
 
-	if (cmd->cmd_argc == 1)
+	path = ft_strdup(name);
+	if (!path)
 	{
-		path = my_getenv(mini_sh->env, "HOME");
-		if (!path)
-		{
-			ft_puterr("cd: HOME not set\n");
-			return (NULL);
-		}
+		ft_puterr("cd: path is NULL\n");
+		return (NULL);
 	}
-	else if (cmd->cmd_argv[1] && ft_strcmp(cmd->cmd_argv[1], "-") == 0)
-	{
-		path = my_getenv(mini_sh->env, "OLDPWD");
-		if (!path)
-		{
-			ft_puterr("cd: OLDPWD not set\n");
-			return (NULL);
-		}
-	}
-	else
-		path = ft_strdup(cmd->cmd_argv[1]);
-	return (path);
+	char *newpath = ft_strjoin(path, new_env2(&mini_sh->env, "PWD"));
+	return (newpath);
 }
-
-void	handle_cd_error(char *path)
-{
-	char	*err;
-
-	err = NULL;
-	if (access(path, F_OK) != 0 || access(path, X_OK) != 0)
-		err = ft_strjoin("cd: ", path);
-	else if (access(path, R_OK) != 0)
-		err = ft_strdup("cd");
-	else if (is_file(path))
-		err = ft_strjoin("cd: ", path);
-	else if (is_directory(path))
-		err = ft_strdup("cd");
-	if (err)
-	{
-		perror(err);
-		my_free((void **)&err);
-	}
-}
-
 int	change_update_dir(t_shell *mini_sh, char *path)
 {
 	int		exit_code;
@@ -109,21 +75,76 @@ int	change_update_dir(t_shell *mini_sh, char *path)
 	return (exit_code);
 }
 
+static char	*cd_set_path(t_shell *mini_sh, t_cmd *cmd)
+{
+	char	*path;
+
+	if (cmd->cmd_argc == 1 || !cmd->cmd_argv[1])
+	{
+		path = new_env2(&mini_sh->env, "HOME");
+		if (!path)
+		{
+			ft_puterr("cd: HOME not set\n");
+			return (NULL);
+		}
+		return (ft_strdup(path));
+	}
+	else if (cmd->cmd_argv[1] && ft_strcmp(cmd->cmd_argv[1], "-") == 0)
+	{
+		path = new_env2(&mini_sh->env, "OLDPWD");
+		if (!path)
+		{
+			ft_puterr("cd: OLDPWD not set\n");
+			return (NULL);
+		}
+		return (ft_strdup(path));
+	}
+	else if (cmd->cmd_argv[1])
+	{
+		return (ft_strdup(cmd->cmd_argv[1]));
+	}
+	else 
+	{
+		path = new_env2(&mini_sh->env, "HOME");
+		if (!path)
+		{
+			ft_puterr("cd: HOME not set\n");
+			return (NULL);
+		}
+		return (ft_strdup(path));
+	}
+}
+
+void	handle_cd_error(char *path)
+{
+	char	*err;
+
+	err = NULL;
+	if (access(path, F_OK) != 0 || access(path, X_OK) != 0)
+		err = ft_strjoin("cd: ", path);
+	else if (access(path, R_OK) != 0)
+		err = ft_strdup("cd");
+	else if (is_file(path))
+		err = ft_strjoin("cd: ", path);
+	else if (is_directory(path))
+		err = ft_strdup("cd");
+	if (err)
+	{
+		perror(err);
+		my_free((void **)&err);
+	}
+}
+
+
+
 int	bi_cd(t_shell *mini_sh, t_cmd *cmd)
 {
 	int		exit_code;
-	char	*raw_path;
 	char	*path;
 
-	raw_path = cd_set_path(mini_sh, cmd);
-	if (!raw_path)
-		return (EXIT_FAILURE);
-	path = ft_strdup(raw_path);
+	path = cd_set_path(mini_sh, cmd);
 	if (!path)
-	{
-		ft_puterr("cd: path is NULL\n");
 		return (EXIT_FAILURE);
-	}
 	exit_code = change_update_dir(mini_sh, path);
 	my_free((void **)&path);
 	return (exit_code);
